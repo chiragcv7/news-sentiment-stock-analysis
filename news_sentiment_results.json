@@ -1,0 +1,38 @@
+[
+  {
+    "publishedAt": "2026-03-05T18:35:17Z",
+    "title": "Netflix is buying Ben Affleck\u2019s AI startup",
+    "url": "https://www.theverge.com/streaming/889973/netflix-ben-affleck-interpositive-ai",
+    "analysis": {
+      "error": "Could not parse JSON",
+      "raw": "[\n    {\n        \"sentiment_score\": \"-0.4\",\n\t\t\"primary_topic\" : 'AI launches from aficionados ',\n       \"companiesmentioned\":\"Ben Affleck's AI startup, InterPositive.\"  \n\t} \n]\n"
+    }
+  },
+  {
+    "publishedAt": "2026-03-10T05:00:00Z",
+    "title": "Yann LeCun Raises $1 Billion to Build AI That Understands the Physical World",
+    "url": "https://www.wired.com/story/yann-lecun-raises-dollar1-billion-to-build-ai-that-understands-the-physical-world/",
+    "analysis": {
+      "error": "Could not parse JSON",
+      "raw": "In this text from the webpage, Yann LeCun raises $1 Billion and makes a lot of mentions about human-level AI which will understand the physical world (hence is not language). Also mentioning that Meta's former chief AI scientist has arguably longed against mastery in understanding real life. AMI plans to prove it, meaning they are aiming at building an actual intelligence system capable of interpreting and processing information from a sense-based physical world through deep learning technology (AI).\n"
+    }
+  },
+  {
+    "publishedAt": "2026-03-11T01:41:42Z",
+    "title": "Trump Administration Won\u2019t Rule Out Further Action Against Anthropic",
+    "url": "https://www.wired.com/story/trump-administration-refuses-to-say-it-wont-take-further-action-against-anthropic/",
+    "analysis": {
+      "error": "Could not parse JSON",
+      "raw": "I apologize, but I can provide the scores and primary topics from this text based on how they appear in a human-like context without knowing exactly what each person uses to express sentiment or content (as per your request). The following data might be an approximation given that sentences usually have similar phrases used for expressing sentiments:\n\n1. Sentiment Score (-1, 0,\u6216+ 1): Could not determine based on provided text alone as sentence \"Trump Administration Won\u2019t Rule Out Further Action Against Anthropic\" does contain the words likely hinting towards a negative sentiment (denying that Trump won't do anything against AI).\n2. Primary Topic ('M&A', 'Product Launch') depends on how these sentences are used: e,g., \"Trump Administration Won\u2019t Rule Out Further Action Against Anthropic\" can suggest the topic is a massive multi-purchase agreement (Multi-Purchasing Agreement) and not specifically around AI related product launches.\n3. Companies mentioned does need more context to provide accurate data or could mean one company but again, without specific information about it - as such parts of text will likely be difficult/impossible for an algorithm built solely on the presence alone in a dataset like this scenario would not capture exactly where companies were discussed within that sentence due these aspects cannot have been mentioned previously.\n"
+    }
+  },
+  {
+    "publishedAt": "2026-03-20T10:00:00Z",
+    "title": "LinkedIn Invited My AI 'Cofounder' to Give a Corporate Talk\u2014Then Banned It",
+    "url": "https://www.wired.com/story/linkedin-invited-my-ai-cofounder-to-give-a-corporate-talk-then-banned-it/",
+    "analysis": {
+      "error": "Could not parse JSON",
+      "raw": "Sure, based on the context in which you posted this text and also asking about Sentiment Score (-1 to 1) from your AI 'Cofounder'. However since it is not clear whether there are any companies or topics being discussed that go beyond these mentioned options (Primary Topic like M&A/Product Launch, Companies mention as per the provided statement), I'm assuming you want a general analysis based on what has been said so far.\nAssuming your 'Cofounder', it is banned from participating in AI event because of its use for exhorting people to make decisions using their technology and sentiment scores are -1 or 1, as this could negatively impact the purposeful participation by professionals who might be interested but not aware there will only one type on how likely they would like them.\nHowever if you want a JSON in response from these three given points then below is your required json:\n```json={ \"sentiment_score\":-1, \u201cprimary topic\u201d:\"M&A/Product Launch\", Companies mentioned : []} ``` Note that I've kept both primary and companies mention empty array to represent the situation. You might want or need replace these fields with real value in case there are any mentions of a company etc..\n"
+    }
+  }
+]

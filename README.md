@@ -1,130 +1,143 @@
-## ELT with Snowflake and Apache Airflow® - Reference architecture
+# 📊 News Sentiment vs Stock Performance Analysis
 
-Welcome! 🚀
+## 🚀 Project Overview
 
-This project is an end-to-end pipeline showing how to implement an ELT pattern with [Snowflake](https://www.snowflake.com/en/) and [Apache Airflow®](https://airflow.apache.org/). The pipeline extracts data from a mocked internal API, loads the raw data into [AWS S3](https://aws.amazon.com/s3/), and then loads the data into a Snowflake table to run transformations creating reporting tables for a [Streamlit dashboard](https://www.streamlit.io/). The pipeline also includes data quality checks that send a notification to [Slack](https://slack.com/) if they fail.
+Built an end-to-end data pipeline that analyzes how news sentiment impacts stock price movements. The system ingests real-time news data, applies LLM-based sentiment analysis, and correlates results with stock market performance.
 
-You can use this project as a starting point to build your own pipelines for similar use cases. It is showcased in the webinar [Implementing reliable ETL & ELT pipelines with Airflow and Snowflake](https://www.astronomer.io/events/webinars/implementing-reliable-etl-elt-pipelines-with-airflow-and-snowflake-video/).
+---
 
-> [!TIP]
-> If you are new to Airflow, we recommend checking out our get started resources: [DAG writing for data engineers and data scientists](https://www.astronomer.io/events/webinars/dag-writing-for-data-engineers-and-data-scientists-video/) before diving into this project.
+## 🧠 Problem Statement
 
-## Tools used
+Financial markets are heavily influenced by news events such as product launches, mergers, and announcements. This project answers:
 
-- [Apache Airflow®](https://airflow.apache.org/docs/apache-airflow/stable/index.html) running on [Astro](https://www.astronomer.io/product/). A [free trial](http://qrco.de/bfHv2Q) is available.
-- [AWS S3](https://aws.amazon.com/s3/) for storing and archiving raw data.
-- [Snowflake](https://www.snowflake.com/en/) for storing and querying transformed data.
+👉 *Does positive or negative news sentiment correlate with stock price movement?*
 
-Optional:
+---
 
-One of the DAGs contains data quality checks that send notifications to Slack if they fail. If you don't want to use Slack, remove the `on_failure_callback` from the `additional_data_quality_checks` task group in the [`load_to_snowflake](dags/load_to_snowflake.py) DAG on line 208.
+## ⚙️ Architecture
 
-- A [Slack](https://slack.com/) workspace with permissions to add a new app is needed for the Slack notification tasks.
+1. **Data Ingestion**
 
-## How to setup the demo environment
+   * Extract news articles using NewsAPI
+   * Filter by industry/topic (e.g., AI startups)
 
-Follow the steps below to set up the demo for yourself.
+2. **LLM Sentiment Analysis**
 
-1. Install Astronomer's open-source local Airflow development tool, the [Astro CLI](https://www.astronomer.io/docs/astro/cli/overview).
-2. Log into your AWS account and create [a new empty S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html). Make sure you have a set of [AWS credentials](https://docs.aws.amazon.com/iam/) with `AmazonS3FullAccess` for this new bucket.
-3. Sign up for a [free trial](https://trial.snowflake.com/?owner=SPN-PID-365384) of Snowflake. Create a database called `etl_demo` with a schema called `dev`, as well as a warehouse called `my_wh`. You can use the following SQL commands to create these objects:
+   * Use local LLM (Ollama - DeepSeek Coder)
+   * Generate structured output:
 
-```sql
-CREATE WAREHOUSE MY_WH;
-CREATE DATABASE IF NOT EXISTS DEMO_DB;
-CREATE SCHEMA IF NOT EXISTS DEMO_DB.DEMO_SCHEMA;
+     * Sentiment Score (-1 to 1)
+     * Topic (e.g., Product Launch, M&A)
+     * Company names
+
+3. **Data Storage**
+
+   * Store raw JSON data in SQLite (`RAW_NEWS_DATA`)
+   * Transform into analytics-ready format (`ANALYTICS_READY_SENTIMENT`)
+
+4. **Stock Data Integration**
+
+   * Fetch stock prices using `yfinance`
+   * Merge with sentiment data by date and company
+
+5. **Visualization**
+
+   * Tableau dashboard:
+
+     * Line chart → Stock Price
+     * Bar chart → Sentiment Score
+     * Dual-axis correlation view
+
+---
+
+## 🛠️ Tech Stack
+
+* **Programming:** Python
+* **Libraries:** pandas, requests, yfinance
+* **LLM:** Ollama (DeepSeek-Coder)
+* **Database:** SQLite
+* **Visualization:** Tableau Public
+* **Workflow Concept:** ELT Pipeline
+
+---
+
+## 📂 Project Structure
+
+```
+.
+├── news_sentiment_pipeline.py      # Fetch + analyze news using LLM
+├── push_to_sqlite.py              # Store data in SQLite
+├── export_to_csv.py               # Export structured data
+├── merge_sentiment_with_stock.py  # Combine sentiment with stock prices
+├── analytics_ready_sentiment.csv
+├── merged_sentiment_stock.csv
+├── requirements.txt
+└── README.md
 ```
 
-4. Create a role and give it the necessary permissions to access the Snowflake objects. You can use the following SQL commands to create the role and grant the necessary permissions:
+---
 
-```sql
-CREATE ROLE my_demo_role;
+## ▶️ How to Run
 
-GRANT USAGE ON WAREHOUSE MY_WH TO ROLE my_demo_role;
-GRANT USAGE ON DATABASE DEMO_DB TO ROLE my_demo_role;
-GRANT USAGE ON SCHEMA DEMO_DB.DEMO_SCHEMA TO ROLE my_demo_role;
+### 1. Install dependencies
 
-GRANT ALL PRIVILEGES ON SCHEMA DEMO_DB.DEMO_SCHEMA TO ROLE my_demo_role;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA DEMO_DB.DEMO_SCHEMA TO ROLE my_demo_role;
-GRANT ALL PRIVILEGES ON FUTURE TABLES IN SCHEMA DEMO_DB.DEMO_SCHEMA TO ROLE my_demo_role;
-GRANT ALL PRIVILEGES ON ALL STAGES IN SCHEMA DEMO_DB.DEMO_SCHEMA TO ROLE my_demo_role;
-GRANT ALL PRIVILEGES ON FUTURE STAGES IN SCHEMA DEMO_DB.DEMO_SCHEMA TO ROLE my_demo_role;
+```
+python3 -m pip install -r requirements.txt
 ```
 
-5. In your terminal run the following command to [generate a private RSA key using OpenSSL](https://docs.openssl.org/master/man1/openssl-genrsa/). Note that while there are other options to generate a key pair, Snowflake has [specific requirements for the key format](https://docs.snowflake.com/en/user-guide/key-pair-auth) and may not accept keys generated with other tools. Make sure to write down the key passphrase as you will need it later.
+### 2. Run news ingestion + sentiment analysis
 
-```bash
-openssl genrsa 2048 | openssl pkcs8 -topk8 -inform PEM -out rsa_key.p8
+```
+python3 news_sentiment_pipeline.py
 ```
 
-Generate the associated public key using the following command:
+### 3. Store data in SQLite
 
-```bash
-openssl rsa -in rsa_key.p8 -pubout -out rsa_key.pub 
+```
+python3 push_to_sqlite.py
 ```
 
-6. Create a user for the demo and set your **public** key from the `rsa_key_pub` file. You can do this by running the following SQL commands.
+### 4. Export structured CSV
 
-```sql
-CREATE USER my_demo_user
-    PASSWORD = '<PW>'
-    DEFAULT_ROLE = my_demo_role
-    MUST_CHANGE_PASSWORD = FALSE;
-
-GRANT ROLE my_demo_role TO USER my_demo_user;
-
-ALTER USER my_demo_user SET RSA_PUBLIC_KEY='<PUBLIC KEY>';
+```
+python3 export_to_csv.py
 ```
 
-7. Create your stage in Snowflake. You can do this by running the following SQL command. Make sure to replace the placeholders with your own values.
+### 5. Merge with stock price data
 
-```sql
-USE DATABASE DEMO_DB;
-USE SCHEMA DEMO_SCHEMA;
-
-CREATE OR REPLACE STAGE DEMO_STAGE
-URL='s3://<YOUR BUCKET NAME>/tea-sales-stage/'
-CREDENTIALS=(AWS_KEY_ID='<YOUR AWS ACCESS KEY>', AWS_SECRET_KEY='<YOUR AWS SECRET KEY')
-FILE_FORMAT = (TYPE = 'CSV');
-
-GRANT ALL PRIVILEGES ON ALL STAGES IN SCHEMA etl_demo.dev TO ROLE etl_demo_role;
+```
+python3 merge_sentiment_with_stock.py
 ```
 
-8. Fork this repository and clone the code locally.
+---
 
-9. (Optional) Create a new Slack app and install it in your workspace. You can follow the instructions in the [Slack API documentation](https://api.slack.com/start). And retrieve an API token for the app.
+## 📈 Output
 
-### Run the project locally
+* `analytics_ready_sentiment.csv` → Clean sentiment dataset
+* `merged_sentiment_stock.csv` → Final dataset for analysis
 
-1. Create a new file called `.env` in the root of the cloned repository and copy the contents of [.env_example](.env_example) into it. Fill out the placeholders with your own credentials for Snowflake, AWS, and Slack.
+---
 
-Note that in a production use case you may want to enable the [Custom XCom backend](https://www.astronomer.io/docs/learn/xcom-backend-tutorial) using the commented environment variables in the `.env` file.
+## 📊 Key Insights
 
-2. In the root of the repository, run `astro dev start` to start up the following Docker containers. This is your local development environment.
+* Positive sentiment events (e.g., product launches) often align with upward stock trends
+* Negative sentiment shows weaker or delayed impact
+* LLM-based tagging enables automated event classification at scale
 
-    - Postgres: Airflow's Metadata Database.
-    - Webserver: The Airflow component responsible for rendering the Airflow UI. Accessible on port `localhost:8080`.
-    - Scheduler: The Airflow component responsible for monitoring and triggering tasks
-    - Triggerer: The Airflow component responsible for triggering deferred tasks
+---
 
-    Note that after any changes to `.env` you will need to run `astro dev restart` for new environment variables to be picked up.
 
-3. Access the Airflow UI at `localhost:8080` and follow the DAG running instructions in the [Running the DAGs](#running-the-dags) section of this README.
+## 🧑‍💻 Author
 
-### Run the project in the cloud
+**Chirag Venkatesh**
+Data Analyst | Data Engineering | GenAI Enthusiast
 
-1. Sign up to [Astro](https://www.astronomer.io/try-astro/?utm_source=learn-docs-reference-architectures&utm_medium=web&utm_campaign=free-trial) for free and follow the onboarding flow to create a deployment with default configurations.
-2. Deploy the project to Astro using `astro deploy`. See [Deploy code to Astro](https://www.astronomer.io/docs/astro/deploy-code).
-3. Set up your Slack, AWS and Snowflake connections, as well as all other environment variables listed in [`.env_example](.env_example) on Astro. For instructions see [Manage Airflow connections and variables](https://www.astronomer.io/docs/astro/manage-connections-variables) and [Manage environment variables on Astro](https://www.astronomer.io/docs/astro/manage-env-vars).
-4. Open the Airflow UI of your Astro deployment and follow the steps in [Running the DAGs](#running-the-dags).
+---
 
-## Running the DAGs
+## 🔗 Notes
 
-1. Unpause all DAGs in the Airflow UI by clicking the toggle to the left of the DAG name.
-2. The `extract_from_api` DAG will start its first run automatically. All other DAGs are scheduled based on Datasets to run as soon as the required data is available.
+This project demonstrates practical application of:
 
-Optional: Set up a streamlit app in Snowflake using the script in [include/streamlit_app.py](include/streamlit_app.py) to visualize the data.
-
-## Next steps
-
-If you'd like to build your own ETL pipeline with Snowflake, feel free adapt this repository to your use case. We recommend to deploy the Airflow pipelines using a [free trial](https://www.astronomer.io/try-astro/?utm_source=learn-docs-reference-architectures&utm_medium=web&utm_campaign=free-trial) of Astro.
+* LLMs in data pipelines
+* Sentiment analysis for financial insights
+* End-to-end data engineering workflow
